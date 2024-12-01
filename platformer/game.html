@@ -73,7 +73,6 @@
                 justify-content: center;
                 align-items: center;
             }
-
             #startScreen h1 {
                 color: #d4af37; /* Gold color */
                 font-family: 'Times New Roman', serif;
@@ -85,7 +84,6 @@
                 font-size: 42px;
                 line-height: 1.2;
             }
-
             .tutorial-container {
                 display: flex;
                 flex-direction: column;
@@ -94,7 +92,6 @@
                 margin-bottom: 30px;
                 max-width: 800px;
             }
-
             .tutorial-box {
                 background-color: rgba(78, 52, 46, 0.95);
                 padding: 25px;
@@ -104,7 +101,6 @@
                 max-width: 600px;
                 box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
             }
-
             .tutorial-box h2, .tutorial-box h3 {
                 font-size: 28px;
                 color: #d4af37;
@@ -114,7 +110,6 @@
                 font-weight: bold;
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             }
-
             .control-item {
                 display: flex;
                 align-items: center;
@@ -122,7 +117,6 @@
                 margin: 15px 0;
                 font-size: 20px;
             }
-
             .key-box {
                 background-color: #2c1810;
                 border: 2px solid #8b4513;
@@ -135,7 +129,6 @@
                 text-align: center;
                 font-size: 18px;
             }
-
             #startButton {
                 padding: 20px 40px;
                 font-size: 28px;
@@ -150,48 +143,39 @@
                 margin-top: 40px;
                 box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             }
-
             #startButton:hover {
                 background-color: #a0522d;
                 transform: translateY(-3px);
             }
-
             #startButton:active {
                 transform: translateY(1px);
             }
-
             .tutorial-box ul {
                 list-style-type: disc;
                 padding-left: 20px;
                 font-size: 18px;
                 margin-top: 10px;
             }
-
             .tutorial-box ul li {
                 margin-bottom: 10px;
             }
-
             @media (max-width: 768px) {
                 .tutorial-container {
                     margin-left: 20px;
                     margin-right: 20px;
                 }
-
                 .tutorial-box {
                     padding: 20px;
                 }
-
                 .control-item {
                     gap: 10px;
                     font-size: 18px;
                 }
-
                 #startButton {
                     padding: 15px 30px;
                     font-size: 24px;
                 }
             }
-
             #cooldownIndicator {
                 position: fixed;
                 top: 20px;
@@ -206,7 +190,6 @@
                 z-index: 100;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             }
-
             #scoreDisplay {
                 position: fixed;
                 top: 20px;
@@ -220,6 +203,22 @@
                 font-size: 16px;
                 z-index: 100;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            }
+            .settings-section {
+                background-color: rgba(78, 52, 46, 0.95);
+                padding: 25px;
+                border-radius: 15px;
+                border: 2px solid #8b4513;
+                width: 100%;
+                max-width: 600px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+                margin-top: 20px;
+            }
+            .settings-section h2 {
+                color: #d4af37;
+                margin-bottom: 20px;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
             }
         </style>
     </head>
@@ -255,6 +254,25 @@
                             <li>Create platforms strategically when stuck</li>
                         </ul>
                     </div>
+                    <div class="settings-section">
+                        <h2>Sound Settings</h2>
+                        <div class="volume-control">
+                            <label for="musicVolume">Background Music</label>
+                            <input type="range" id="musicVolume" min="0" max="100" value="100">
+                        </div>
+                        <div class="volume-control">
+                            <label for="jumpVolume">Jump Sound</label>
+                            <input type="range" id="jumpVolume" min="0" max="100" value="50">
+                        </div>
+                        <div class="volume-control">
+                            <label for="landVolume">Landing Sound</label>
+                            <input type="range" id="landVolume" min="0" max="100" value="50">
+                        </div>
+                        <div class="volume-control">
+                            <label for="deathVolume">Death Sound</label>
+                            <input type="range" id="deathVolume" min="0" max="100" value="50">
+                        </div>
+                    </div>
                 </div>
                 <button id="startButton">Start Game</button>
             </div>
@@ -267,6 +285,21 @@
         </div>
 
         <script>
+            const bgMusic = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/Ascendia%20Tower%20of%20Trials%20Theme%20%5BInstrumental%5D.mp3');
+            bgMusic.loop = true;
+            let isMusicPlaying = false;
+
+            const jumpSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/jump.wav');
+            const landSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/land.wav');
+            const deathSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/death.wav');
+
+            let soundVolumes = {
+                music: 1,
+                jump: 0.5,
+                land: 0.5,
+                death: 0.5
+            };
+
             const canvas = document.getElementById("gameCanvas");
             const ctx = canvas.getContext("2d");
             const deathScreen = document.getElementById("deathScreen");
@@ -288,11 +321,35 @@
                 score = 0;
                 highestPlatformReached = canvas.height - 50;
                 scoreDisplay.textContent = `Score: ${score}`;
+                if (!isMusicPlaying) {
+                    bgMusic.play().catch(e => console.log("Music play failed:", e));
+                    isMusicPlaying = true;
+                }
                 gameLoop();
             });
 
             playAgainBtn.addEventListener("click", () => {
                 window.location.reload();
+            });
+
+            document.getElementById('musicVolume').addEventListener('input', (e) => {
+                soundVolumes.music = e.target.value / 100;
+                bgMusic.volume = soundVolumes.music;
+            });
+
+            document.getElementById('jumpVolume').addEventListener('input', (e) => {
+                soundVolumes.jump = e.target.value / 100;
+                jumpSound.volume = soundVolumes.jump;
+            });
+
+            document.getElementById('landVolume').addEventListener('input', (e) => {
+                soundVolumes.land = e.target.value / 100;
+                landSound.volume = soundVolumes.land;
+            });
+
+            document.getElementById('deathVolume').addEventListener('input', (e) => {
+                soundVolumes.death = e.target.value / 100;
+                deathSound.volume = soundVolumes.death;
             });
 
             canvas.width = window.innerWidth;
@@ -391,8 +448,21 @@
 
             function playSound(src) {
                 try {
-                    const sound = new Audio(src);
-                    sound.play().catch(e => console.log("Sound play failed:", e));
+                    let sound;
+                    switch(src) {
+                        case 'jump.wav':
+                            jumpSound.volume = soundVolumes.jump;
+                            jumpSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                        case 'land.wav':
+                            landSound.volume = soundVolumes.land;
+                            landSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                        case 'death.wav':
+                            deathSound.volume = soundVolumes.death;
+                            deathSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                    }
                 } catch (e) {
                     console.log("Sound creation failed:", e);
                 }
