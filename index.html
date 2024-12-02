@@ -1,12 +1,578 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=platformer/game.html">
-    <title>Redirecting...</title>
-</head>
-<body>
-    <p>If you are not redirected automatically, follow this <a href="platformer/game.html">link</a>.</p>
-</body>
+<html><head><base href="." />
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ascendia: Tower of Trials</title>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+                background-color: #2c1810; /* Dark wood-like color */
+            }
+            canvas {
+                display: block;
+            }
+            #deathScreen {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(44, 24, 16, 0.95);
+                background-image: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" fill="none" stroke="%238b4513" stroke-width="0.5"/></svg>');
+                color: #d4af37; /* Gold color */
+                text-align: center;
+                z-index: 1000;
+                font-family: 'Times New Roman', serif;
+            }
+            #deathScreen div {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            #deathScreen h1 {
+                font-size: 48px;
+                margin-bottom: 20px;
+                color: #d4af37;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            #playAgain {
+                padding: 15px 30px;
+                font-size: 24px;
+                background-color: #8b4513;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+                border: 2px solid #d4af37;
+                color: #d4af37;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            #playAgain:hover {
+                background-color: #a0522d;
+            }
+            #startScreen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(44, 24, 16, 0.95);
+                background-image: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" fill="none" stroke="%238b4513" stroke-width="0.5"/></svg>');
+                color: white;
+                text-align: center;
+                z-index: 1000;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #startScreen h1 {
+                color: #d4af37; /* Gold color */
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                border-bottom: 2px solid #8b4513;
+                padding-bottom: 10px;
+                margin-bottom: 30px;
+                font-size: 42px;
+                line-height: 1.2;
+            }
+            .tutorial-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+                margin-bottom: 30px;
+                max-width: 800px;
+            }
+            .tutorial-box {
+                background-color: rgba(78, 52, 46, 0.95);
+                padding: 25px;
+                border-radius: 15px;
+                border: 2px solid #8b4513;
+                width: 100%;
+                max-width: 600px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            }
+            .tutorial-box h2, .tutorial-box h3 {
+                font-size: 28px;
+                color: #d4af37;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+                margin-bottom: 15px;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+            .control-item {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                margin: 15px 0;
+                font-size: 20px;
+            }
+            .key-box {
+                background-color: #2c1810;
+                border: 2px solid #8b4513;
+                color: #d4af37;
+                font-family: 'Times New Roman', serif;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-weight: bold;
+                min-width: 80px;
+                text-align: center;
+                font-size: 18px;
+            }
+            #startButton {
+                padding: 20px 40px;
+                font-size: 28px;
+                background-color: #8b4513;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+                border: 2px solid #d4af37;
+                color: #d4af37;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                cursor: pointer;
+                transition: background-color 0.3s, transform 0.2s;
+                margin-top: 40px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            }
+            #startButton:hover {
+                background-color: #a0522d;
+                transform: translateY(-3px);
+            }
+            #startButton:active {
+                transform: translateY(1px);
+            }
+            .tutorial-box ul {
+                list-style-type: disc;
+                padding-left: 20px;
+                font-size: 18px;
+                margin-top: 10px;
+            }
+            .tutorial-box ul li {
+                margin-bottom: 10px;
+            }
+            @media (max-width: 768px) {
+                .tutorial-container {
+                    margin-left: 20px;
+                    margin-right: 20px;
+                }
+                .tutorial-box {
+                    padding: 20px;
+                }
+                .control-item {
+                    gap: 10px;
+                    font-size: 18px;
+                }
+                #startButton {
+                    padding: 15px 30px;
+                    font-size: 24px;
+                }
+            }
+            #cooldownIndicator {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: rgba(44, 24, 16, 0.9);
+                border: 2px solid #8b4513;
+                font-family: 'Times New Roman', serif;
+                color: #d4af37; /* Gold color */
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                z-index: 100;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            }
+            #scoreDisplay {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background-color: rgba(44, 24, 16, 0.9);
+                border: 2px solid #8b4513;
+                font-family: 'Times New Roman', serif;
+                color: #d4af37; /* Gold color */
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 16px;
+                z-index: 100;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            }
+            .settings-section {
+                background-color: rgba(78, 52, 46, 0.95);
+                padding: 25px;
+                border-radius: 15px;
+                border: 2px solid #8b4513;
+                width: 100%;
+                max-width: 600px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+                margin-top: 20px;
+            }
+            .settings-section h2 {
+                color: #d4af37;
+                margin-bottom: 20px;
+                font-family: 'Times New Roman', serif;
+                text-transform: uppercase;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="gameCanvas"></canvas>
+        <div id="cooldownIndicator">Platform Cooldown: Ready!</div>
+        <div id="scoreDisplay">Score: 0</div>
+        <div id="startScreen">
+            <div>
+                <h1>Ascendia:<br>Tower of Trials</h1>
+                <div class="tutorial-container">
+                    <div class="tutorial-box">
+                        <h2>How to Play</h2>
+                        <div class="control-item">
+                            <div class="key-box">←→</div>
+                            <div>Move left and right</div>
+                        </div>
+                        <div class="control-item">
+                            <div class="key-box">↑</div>
+                            <div>Jump (you can double jump!)</div>
+                        </div>
+                        <div class="control-item">
+                            <div class="key-box">SPACE</div>
+                            <div>Create platform below you (10s cooldown)</div>
+                        </div>
+                    </div>
+                    <div class="tutorial-box">
+                        <h3>Tips</h3>
+                        <ul style="text-align: left; padding-left: 20px;">
+                            <li>Climb as high as you can</li>
+                            <li>Score points by reaching new heights</li>
+                            <li>Use double jumps wisely</li>
+                            <li>Create platforms strategically when stuck</li>
+                        </ul>
+                    </div>
+                    <div class="settings-section">
+                        <h2>Sound Settings</h2>
+                        <div class="volume-control">
+                            <label for="musicVolume">Background Music</label>
+                            <input type="range" id="musicVolume" min="0" max="100" value="100">
+                        </div>
+                        <div class="volume-control">
+                            <label for="jumpVolume">Jump Sound</label>
+                            <input type="range" id="jumpVolume" min="0" max="100" value="50">
+                        </div>
+                        <div class="volume-control">
+                            <label for="landVolume">Landing Sound</label>
+                            <input type="range" id="landVolume" min="0" max="100" value="50">
+                        </div>
+                        <div class="volume-control">
+                            <label for="deathVolume">Death Sound</label>
+                            <input type="range" id="deathVolume" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                </div>
+                <button id="startButton">Start Game</button>
+            </div>
+        </div>
+        <div id="deathScreen">
+            <div>
+                <h1>Game Over!</h1>
+                <button id="playAgain">Play Again</button>
+            </div>
+        </div>
+
+        <script>
+            const bgMusic = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/Ascendia%20Tower%20of%20Trials%20Theme%20%5BInstrumental%5D.mp3');
+            bgMusic.loop = true;
+            let isMusicPlaying = false;
+
+            const jumpSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/jump.wav');
+            const landSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/land.wav');
+            const deathSound = new Audio('https://github.com/BRHoyoVerseBuilds/Ascendia-Tower-of-Trials/raw/main/platformer/death.wav');
+
+            let soundVolumes = {
+                music: 1,
+                jump: 0.5,
+                land: 0.5,
+                death: 0.5
+            };
+
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+            const deathScreen = document.getElementById("deathScreen");
+            const playAgainBtn = document.getElementById("playAgain");
+            const startScreen = document.getElementById("startScreen");
+            const startButton = document.getElementById("startButton");
+            const cooldownIndicator = document.getElementById("cooldownIndicator");
+            const scoreDisplay = document.getElementById("scoreDisplay");
+
+            let gameStarted = false;
+            let canCreatePlatform = true;
+            let platformCooldown = 10000; // 10 seconds in milliseconds
+            let score = 0;
+            let highestPlatformReached = canvas.height - 50;  // Initial ground platform Y
+
+            startButton.addEventListener("click", () => {
+                startScreen.style.display = "none";
+                gameStarted = true;
+                score = 0;
+                highestPlatformReached = canvas.height - 50;
+                scoreDisplay.textContent = `Score: ${score}`;
+                if (!isMusicPlaying) {
+                    bgMusic.play().catch(e => console.log("Music play failed:", e));
+                    isMusicPlaying = true;
+                }
+                gameLoop();
+            });
+
+            playAgainBtn.addEventListener("click", () => {
+                window.location.reload();
+            });
+
+            document.getElementById('musicVolume').addEventListener('input', (e) => {
+                soundVolumes.music = e.target.value / 100;
+                bgMusic.volume = soundVolumes.music;
+            });
+
+            document.getElementById('jumpVolume').addEventListener('input', (e) => {
+                soundVolumes.jump = e.target.value / 100;
+                jumpSound.volume = soundVolumes.jump;
+            });
+
+            document.getElementById('landVolume').addEventListener('input', (e) => {
+                soundVolumes.land = e.target.value / 100;
+                landSound.volume = soundVolumes.land;
+            });
+
+            document.getElementById('deathVolume').addEventListener('input', (e) => {
+                soundVolumes.death = e.target.value / 100;
+                deathSound.volume = soundVolumes.death;
+            });
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const knightImage = new Image();
+            knightImage.src = "https://github.com/BRHoyoVerseBuilds/Platformer/blob/main/platformer/knight_sprite.png?raw=true"; // Normal sprite (grounded)
+
+            const knightJumpImage = new Image();
+            knightJumpImage.src = "https://github.com/BRHoyoVerseBuilds/Platformer/blob/main/platformer/knight-jump_sprite.png?raw=true"; // Jumping sprite
+
+
+            const player = {
+                x: canvas.width / 2 - 25,
+                y: canvas.height - 150,
+                width: 50,  // Keep this for scaling the sprite (you can adjust this)
+                height: 50, // Same here for height
+                velocityX: 0,
+                velocityY: 0,
+                speed: 5,
+                gravity: 0.5,
+                jumpStrength: 15,
+                grounded: false,
+                jumpsLeft: 2,
+                canJump: true
+            };
+
+            let platforms = [
+                { x: 0, y: canvas.height - 50, width: canvas.width, height: 50, color: "#8b4513" },
+            ];
+
+            let cameraY = 0;
+            let gameOver = false;
+            let landed = false;
+
+            const keys = {
+                left: false,
+                right: false,
+                up: false,
+                space: false
+            };
+
+            window.addEventListener("keydown", (e) => {
+                if (!gameStarted) return;
+                if (e.key === "ArrowLeft") keys.left = true;
+                if (e.key === "ArrowRight") keys.right = true;
+                if (e.key === "ArrowUp" && !keys.up) {
+                    keys.up = true;
+                    if (player.jumpsLeft > 0) {
+                        player.velocityY = -player.jumpStrength;
+                        player.jumpsLeft--;
+                        player.grounded = false;
+                        playSound('jump.wav');
+                    }
+                }
+                if (e.key === " " && canCreatePlatform) {
+                    createPlatformAtPlayer();
+                }
+            });
+
+            window.addEventListener("keyup", (e) => {
+                if (e.key === "ArrowLeft") keys.left = false;
+                if (e.key === "ArrowRight") keys.right = false;
+                if (e.key === "ArrowUp") keys.up = false;
+            });
+
+            function createPlatformAtPlayer() {
+                const platformWidth = 100;
+                const platformHeight = 20;
+                const newPlatform = {
+                    x: player.x - platformWidth/2 + player.width/2,
+                    y: player.y + player.height + 20,
+                    width: platformWidth,
+                    height: platformHeight,
+                    color: "#d4af37" // Gold color for player-created platforms
+                };
+                
+                platforms.push(newPlatform);
+                canCreatePlatform = false;
+                cooldownIndicator.textContent = "Platform Cooldown: 10s";
+                
+                let timeLeft = 10;
+                const countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        cooldownIndicator.textContent = `Platform Cooldown: ${timeLeft}s`;
+                    }
+                }, 1000);
+
+                setTimeout(() => {
+                    canCreatePlatform = true;
+                    clearInterval(countdownInterval);
+                    cooldownIndicator.textContent = "Platform Cooldown: Ready!";
+                }, platformCooldown);
+            }
+
+            function playSound(src) {
+                try {
+                    let sound;
+                    switch(src) {
+                        case 'jump.wav':
+                            jumpSound.volume = soundVolumes.jump;
+                            jumpSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                        case 'land.wav':
+                            landSound.volume = soundVolumes.land;
+                            landSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                        case 'death.wav':
+                            deathSound.volume = soundVolumes.death;
+                            deathSound.play().catch(e => console.log("Sound play failed:", e));
+                            break;
+                    }
+                } catch (e) {
+                    console.log("Sound creation failed:", e);
+                }
+            }
+
+            function generatePlatform(y) {
+                const width = Math.random() * 100 + 100;
+                const x = Math.random() * (canvas.width - width);
+                const verticalSpacing = Math.random() * 100 + 100;
+                // Add some variety to platform colors - different wood shades
+                const colors = ['#8b4513', '#a0522d', '#6b4423'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                return { x, y: y - verticalSpacing, width, height: 20, color };
+            }
+
+            function checkPlatformCollision() {
+                player.grounded = false;
+                for (const platform of platforms) {
+                    const playerBottom = player.y + player.height;
+                    const platformTop = platform.y;
+                    const nextPlayerBottom = playerBottom + player.velocityY;
+
+                    if (player.x < platform.x + platform.width &&
+                        player.x + player.width > platform.x) {
+                        
+                        if (playerBottom <= platformTop && nextPlayerBottom >= platformTop) {
+                            player.y = platformTop - player.height;
+                            player.velocityY = 0;
+                            player.grounded = true;
+                            player.jumpsLeft = 2;
+
+                            // Add scoring logic
+                            if (platform.y < highestPlatformReached) {
+                                highestPlatformReached = platform.y;
+                                score++;
+                                scoreDisplay.textContent = `Score: ${score}`;
+                            }
+
+                            if (!landed) {
+                                playSound('land.wav');
+                                landed = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (!player.grounded) {
+                    landed = false;
+                }
+            }
+
+            function showDeathScreen() {
+                deathScreen.querySelector('h1').textContent = `Game Over! Score: ${score}`;
+                deathScreen.style.display = "block";
+                playSound('death.wav');
+                gameOver = true;
+            }
+
+            function gameLoop() {
+                if (!gameStarted || gameOver) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (!player.grounded) {
+                    player.velocityY += player.gravity;
+                }
+
+                if (keys.left) player.velocityX = -player.speed;
+                else if (keys.right) player.velocityX = player.speed;
+                else player.velocityX = 0;
+
+                player.x += player.velocityX;
+                player.y += player.velocityY;
+
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                checkPlatformCollision();
+
+                cameraY = Math.min(cameraY, player.y - canvas.height / 2);
+
+                platforms = platforms.filter((platform) => platform.y - cameraY <= canvas.height);
+
+                const platformSpacing = 150;
+                while (platforms[platforms.length - 1].y - cameraY > platformSpacing) {
+                    const lastPlatform = platforms[platforms.length - 1];
+                    platforms.push(generatePlatform(lastPlatform.y));
+                }
+
+                for (const platform of platforms) {
+                    ctx.fillStyle = platform.color;
+                    ctx.fillRect(platform.x, platform.y - cameraY, platform.width, platform.height);
+                }
+
+                // Draw the knight sprite depending on whether the player is grounded or in the air
+                if (player.grounded) {
+                    ctx.drawImage(knightImage, player.x, player.y - cameraY, player.width, player.height);
+                } else {
+                    ctx.drawImage(knightJumpImage, player.x, player.y - cameraY, player.width, player.height);
+                }
+
+                if (player.y - cameraY > canvas.height) {
+                    showDeathScreen();
+                    return;
+                }
+
+                requestAnimationFrame(gameLoop);
+            }
+        </script>
+    </body>
+    </html>
 </html>
